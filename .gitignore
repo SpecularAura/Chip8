@@ -1,0 +1,8 @@
+Programs/
+**/*.a
+**/*.dll
+**/*.exe
+**/*.o
+SDL2-devel-2.26.5-mingw/
+**/*.zip
+SDL2/

@@ -1,0 +1,46 @@
+{
+	"version": "2.0.0",
+	"options": {
+		"env": {
+			"PATH": "\"D:\\ProgrammingTools\\MSYS2\\ucrt64\\bin;\""
+		}
+	},
+	"tasks": [
+		{
+			"type": "cppbuild",
+			"label": "C/C++: gcc.exe build active file",
+			"command": "D:\\ProgrammingTools\\MSYS2\\ucrt64\\bin\\gcc.exe",
+			"args": [
+				"-fdiagnostics-color=always",
+				"-g",
+				"${file}",
+				"-I\"${workspaceFolder}\\SDL2\"",
+				"-L\"${workspaceFolder}\\SDL2\\bin\"",
+				"-lmingw32",
+				"-lSDL2main",
+				"-lSDL2",
+				"-o",
+				"${fileDirname}\\${fileBasenameNoExtension}.exe"
+			],
+			"options": {
+				"cwd": "${fileDirname}"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"detail": "compiler: \"D:\\ProgrammingTools\\MSYS2\\ucrt64\\bin\\gcc.exe\""
+		},
+		{
+			"type": "shell",
+			"label": "Testing",
+			"command": "echo",
+			"args": [
+				"$env:PATH"
+			]
+		}
+	]
+}
