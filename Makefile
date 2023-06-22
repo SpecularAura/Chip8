@@ -1,6 +1,8 @@
 CC = g++
 CC_FLAGS = -g -std=c++17 -Wall -Wextra -Werror -Wno-error=unknown-pragmas -Wno-error=unused-variable
 
+DEBUG=NODEBUG
+
 IDIRSDL = ./SDL2
 IDIR = ./dependencies/Headers
 
@@ -23,24 +25,31 @@ _CPP = $(wildcard $(SRCDIR)/*.cpp)
 #CPP = $(patsubst %,$(SRCDIR)/%,$(_CPP))
 CPP = $(_CPP)
 
+ifeq ($(DEBUG), NODEBUG)
+CPP = $(_CPP) $(SRCDIR)/Instructions/ProdFunctions.cpp
+else
+CPP = $(_CPP) $(SRCDIR)/Instructions/DebugFunctions.cpp
+endif
+
 #_OBJ = $(patsubst %.cpp,%.o,$(CPP))
 _OBJ = $(patsubst $(SRCDIR)/%.cpp,$(ODIR)/%.o,$(CPP))
 OBJ = $(_OBJ)
+
 EXECUTABLE = main
 
 $(EXECUTABLE):$(OBJ)
-	$(CC) $(CC_FLAGS) $@.cpp $(INCLUDEMAIN) $(LIBS) $(OBJ) -o $@ $(LIBLINK)
+	$(CC) $(CC_FLAGS) $@.cpp -D$(DEBUG) $(INCLUDEMAIN) $(LIBS) $(OBJ) -o $@ $(LIBLINK)
 
 test: test.cpp $(OBJ)
-	$(CC) $(CC_FLAGS) $@.cpp -DDEBUG $(INCLUDEMAIN) $(LIBS) $(OBJ) -o $@ $(LIBLINK) 
+	$(CC) $(CC_FLAGS) $@.cpp -D$(DEBUG) $(INCLUDEMAIN) $(LIBS) $(OBJ) -o $@ $(LIBLINK) 
 
 testemu: testemu.cpp $(OBJ)
-	$(CC) $(CC_FLAGSS) $@.cpp -DDEBUG $(INCLUDEMAIN) $(LIBS) $(OBJ) -o $@ $(LIBLINK)
+	$(CC) $(CC_FLAGSS) $@.cpp -D$(DEBUG) $(INCLUDEMAIN) $(LIBS) $(OBJ) -o $@ $(LIBLINK)
 
 $(ODIR)/%.o:$(SRCDIR)/%.cpp $(DEPS) 
-	$(CC) $(CC_FLAGS) -c $< $(INCLUDEDEP) -o $@
+	$(CC) $(CC_FLAGS) -D$(DEBUG) -c $< $(INCLUDEDEP) -o $@
 
 .PHONY: clean
 
 clean:
-	rm $(ODIR)/*.o *.exe
+	rm -r $(ODIR)/*.o *.exe

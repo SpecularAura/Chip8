@@ -27,11 +27,6 @@ class Display
         PAUSED,
         RUNNING
     };
-    // struct AudioOptions {
-    //     unsigned int volume;
-    //     unsigned int sampleRate;
-    //     int toneFreq;
-    // } audioOptions;
     Chip8 chip8;
     Options options;
     emuState chipState; 

@@ -2,12 +2,8 @@
 #include <iostream>
 #include "SDL2/SDL.h"
 #include "Chip8.hpp"
-Display::Display(Options options) : chip8{}, options{options}, chipState{emuState::RUNNING}, sampleRate{44100}, volume{1}
-{
-    // audioOptions.sampleRate = sampleRate;
-    // audioOptions.volume = 3000;
-    // audioOptions.toneFreq = options.toneFreq;
-}
+Display::Display(Options options) : chip8{}, options{options}, chipState{emuState::RUNNING}, sampleRate{44100}, volume{1000}
+{}
 
 Color::Color(uint32_t colorEncoded) : 
     r{0},
@@ -59,8 +55,8 @@ bool Display::InitChip(int scaleFactor, const char *romFile)
     SDL_AudioSpec want, obtained;
     want.freq     = sampleRate;  // Sampling Rate 44100 Hz
     want.channels = 1;  // Mono Audio
-    want.samples  = 512; // Buffer Size for each channel: Total Buffer Size = samples * channels
-    want.format   = AUDIO_U8;
+    want.samples  = 2048; // Buffer Size for each channel: Total Buffer Size = samples * channels
+    want.format   = AUDIO_S16SYS;
     want.callback = Display::audioCallback;
     want.userdata = static_cast<void*>(this);
 
@@ -79,10 +75,11 @@ bool Display::InitChip(int scaleFactor, const char *romFile)
         (want.channels != obtained.channels)) {
 
         std::cout << "Could not get desired Audio Spec\n";
-        // return false;
+        return false;
     }
 
     ClearScreen();
+    SDL_RenderPresent(renderer);
     chip8.LoadRom(romFile);
     options.romFile = romFile;
     options.scaleFactor = scaleFactor;
@@ -98,17 +95,16 @@ void Display::audioCallback(void* userdata, Uint8* stream, int len)
 void Display::RenderAudio(Uint8* stream, int len)
 {
     static int32_t sampleCount = 0;
-    static bool isHigh = false;
+    int16_t* audio_stream = (int16_t*) stream;
+    // static bool isHigh = false;
     const int32_t square_wave_period = sampleRate / options.toneFreq;
     const int32_t half_square_wave_period = square_wave_period / 2;
-    for(int i = 0; i < len; i++)
+    for(int i = 0; i < len / 2; i++)
     {
-        if(sampleCount++ >= half_square_wave_period)
-        {
-            isHigh = !isHigh;
-            sampleCount = 0;
-        }
-        stream[i] = (isHigh ? volume : 0);
+        audio_stream[i] = (
+            (sampleCount++ / half_square_wave_period) % 2
+            ? volume 
+            : -volume);
     }
     
 }
@@ -187,30 +183,6 @@ void Display::ProcessInput()
                         // '=': Reset CHIP8 machine for the current ROM
                         chip8.Reset(true, options.romFile);
                         break;
-
-                    // case SDLK_j:
-                    //     // 'j': Decrease color lerp rate
-                    //     if (config->color_lerp_rate > 0.1)
-                    //         config->color_lerp_rate -= 0.1;
-                    //     break;
-
-                    // case SDLK_k:
-                    //     // 'k': Increase color lerp rate
-                    //     if (config->color_lerp_rate < 1.0)
-                    //         config->color_lerp_rate += 0.1;
-                    //     break;
-
-                    // case SDLK_o:
-                    //     // 'o': Decrease Volume
-                    //     if (config->volume > 0)
-                    //         config->volume -= 500;
-                    //     break;
-
-                    // case SDLK_p:
-                    //     // 'p': Increase Volume
-                    //     if (config->volume < INT16_MAX)
-                    //         config->volume += 500;
-                    //     break;
 
                     // Map qwerty keys to CHIP8 keypad
                     case SDLK_1: chip8.keypad[0x1] = 1; break;
