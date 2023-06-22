@@ -11,21 +11,56 @@ int Chip8::LoadRom(const char *filename)
         file.seekg(0, std::ios::beg);
         file.read(buffer, size);
         file.close();
-
-        std::ios init(NULL);
-        init.copyfmt(std::cout);
         for (long i = 0; i < size; ++i)
         {
             memory[START_ADDRESS + i] = buffer[i];
-
-            std::cout << std::hex << START_ADDRESS + i << ": ";
-            std::cout << std::hex << std::setw(2) << std::setfill('0')
-                      << ((+buffer[i]) & 0xFFu);
-            std::cout << "\n";
         }
-        std::cout.copyfmt(init);
         delete[] buffer;
     }
     return size;
 }
 ```
+The above snippet works fine
+
+
+```
+int Chip8::LoadRom(const char *filename)
+{
+    int i = 0;
+    std::ifstream file(filename, std::ios::binary);
+    if (file.is_open())
+    {
+        char x;
+        while (file)
+        {
+            file.read(&x, 1);
+            memory[START_ADDRESS + i] = x;
+            i++;
+        }
+        file.close();
+    }
+    return i;
+}
+```
+This works just as fine too
+
+However,
+```
+int Chip8::LoadRom(const char *filename)
+{
+    int i = 0;
+    std::ifstream file(filename, std::ios::binary);
+    if (file.is_open())
+    {
+        char x;
+        while (file >> x)
+        {
+            memory[START_ADDRESS + i] = x;
+            i++;
+        }
+        file.close();
+    }
+    return i;
+}
+```
+Skips over some lines and I can't figure out a reason why
